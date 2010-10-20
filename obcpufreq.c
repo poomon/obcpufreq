@@ -8,17 +8,49 @@
  * %lu will be replaced by target frequency
  * %s will be replaced by target governor
  */
-#define CPU 0
 #define CPUFREQ_SET_MAX "sudo -n cpufreq-set --max %lu"
 #define CPUFREQ_SET_MIN "sudo -n cpufreq-set --min %lu"
 #define CPUFREQ_SET_GOV "sudo -n cpufreq-set -g %s"
 
 #define MAXLEN 20
+#define LINE_LEN 10
 #define	PIPEMENU_BEGIN printf("<?xml version='1.0' encoding='UTF-8'?>\n<openbox_pipe_menu>\n");
 #define	PIPEMENU_END   printf("</openbox_pipe_menu>\n");
 #define SEPARATOR      printf(" <separator/>\n");
 
-// ripped from cpufreq-info
+
+static unsigned int count_cpus(void)
+{
+    FILE *fp;
+    char value[LINE_LEN];
+    unsigned int ret = 0;
+    unsigned int cpunr = 0;
+
+    fp = fopen("/proc/stat", "r");
+    if(!fp) {
+        // assume 1 cpu
+        return 1;
+    }
+
+    while (!feof(fp)) {
+        if (!fgets(value, LINE_LEN, fp))
+            continue;
+        value[LINE_LEN - 1] = '\0';
+        if (strlen(value) < (LINE_LEN - 2))
+            continue;
+        if (strstr(value, "cpu "))
+            continue;
+        if (sscanf(value, "cpu%d ", &cpunr) != 1)
+            continue;
+        if (cpunr > ret)
+            ret = cpunr;
+    }
+    fclose(fp);
+
+    /* cpu count starts from 0, on error return 1 (UP) */
+    return (ret+1);
+}
+
 void get_human_speed(char* dest, unsigned long speed)
 {
     unsigned long tmp;
@@ -46,7 +78,7 @@ void get_human_speed(char* dest, unsigned long speed)
     return;
 }
 
-int main(int argc, char** argv)
+void print_cpu(unsigned int cpu, unsigned int n_cpu)
 {
     int i = 0;
     char str[MAXLEN];
@@ -57,13 +89,23 @@ int main(int argc, char** argv)
     struct cpufreq_available_governors* govs;
     struct cpufreq_policy* policy;
 
-    freqs = cpufreq_get_available_frequencies(CPU);
-    govs = cpufreq_get_available_governors(CPU);
-    policy = cpufreq_get_policy(CPU);
-    curfreq = cpufreq_get_freq_kernel(CPU);
+    if (cpu + 1 == n_cpu)
+        // last cpu
+        printf("<item label='cpu %u'/>\n", cpu, cpu);
+    else
+        printf("<menu label='cpu %u' id='obcpufreq-cpu%u'>\n", cpu, cpu);
+    if (cpu + 1 < n_cpu)
+    {
+        print_cpu(cpu + 1, n_cpu);
+        printf("</menu>\n");
+    }
+    SEPARATOR
 
-    PIPEMENU_BEGIN
+    curfreq = cpufreq_get_freq_kernel(cpu);
+    policy = cpufreq_get_policy(cpu);
+
     // print available governors
+    govs = cpufreq_get_available_governors(cpu);
     if (govs)
     {
         printf("<menu label='governors' id='obcpufreq-governors'>\n");
@@ -79,15 +121,11 @@ int main(int argc, char** argv)
         }
         printf("</menu>\n");
         SEPARATOR
+        cpufreq_put_available_governors(govs);
     }
 
-    /*
-    // print current freq
-    get_human_speed(str, curfreq);
-    printf("<item label='%s'/>\n", str);
-    */
-
     // print available freqs
+    freqs = cpufreq_get_available_frequencies(cpu);
     if (freqs)
     {
         for (; freqs; freqs = freqs->next, i++)
@@ -117,10 +155,19 @@ int main(int argc, char** argv)
                    premark, str, postmark, i,
                    freqs->frequency, freqs->frequency);
         }
+        cpufreq_put_available_frequencies(freqs);
     }
     else
         printf("<item label='%s'/>\n", "no available freqs");
 
+    cpufreq_put_policy(policy);
+    return;
+}
+
+int main(int argc, char** argv)
+{
+    PIPEMENU_BEGIN
+    print_cpu(0, count_cpus());
     PIPEMENU_END
     return 0;
 }
