@@ -78,7 +78,7 @@ void get_human_speed(char* dest, unsigned long speed)
     return;
 }
 
-void print_cpu(unsigned int cpu, unsigned int n_cpu)
+void print_cpu(unsigned int cpu, unsigned int n_cpus)
 {
     int i = 0;
     char str[MAXLEN];
@@ -89,13 +89,13 @@ void print_cpu(unsigned int cpu, unsigned int n_cpu)
     struct cpufreq_available_governors* govs;
     struct cpufreq_policy* policy;
 
-    if (cpu + 1 == n_cpu)
+    if (cpu + 1 == n_cpus)
         // last cpu column
         printf("<item label='cpu %u'/>\n", cpu);
-    else if (cpu + 1 < n_cpu)
+    else if (cpu + 1 < n_cpus)
     {
         printf("<menu label='cpu %u' id='obcpufreq-cpu%u'>\n", cpu, cpu + 1);
-        print_cpu(cpu + 1, n_cpu);
+        print_cpu(cpu + 1, n_cpus);
         printf("</menu>\n");
     }
     SEPARATOR
