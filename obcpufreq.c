@@ -100,7 +100,7 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
     govs = cpufreq_get_available_governors(cpu);
     if (govs)
     {
-        printf("<menu label='governors' id='obcpufreq-governors'>\n");
+        printf("<menu label='governors' id='obcpufreq-governors%u'>\n", cpu);
         for (; govs; govs = govs->next)
         {
             premark[0] = ' ';
@@ -113,9 +113,11 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
                    cpu, govs->governor);
         }
         printf("</menu>\n");
-        SEPARATOR
         cpufreq_put_available_governors(govs);
     }
+    else
+        printf("<item label='%s'/>\n", "no available governors");
+    SEPARATOR
 
     // print available freqs
     freqs = cpufreq_get_available_frequencies(cpu);
