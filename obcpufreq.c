@@ -3,14 +3,7 @@
 #include <string.h>
 #include <cpufreq.h>
 
-/* user config 
- * ===========
- * %lu will be replaced by target frequency
- * %s will be replaced by target governor
- */
-#define CPUFREQ_SET_MAX "sudo -n cpufreq-set --max %lu"
-#define CPUFREQ_SET_MIN "sudo -n cpufreq-set --min %lu"
-#define CPUFREQ_SET_GOV "sudo -n cpufreq-set -g %s"
+#define CPUFREQ_SET "sudo -n cpufreq-set"
 
 #define MAXLEN 20
 #define LINE_LEN 10
@@ -114,9 +107,10 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
             premark[1] = '\0';
             if (!strcmp(govs->governor, policy->governor))
                 premark[0] = '*';
-            printf("  <item label='%s%s'><action name='Execute'><command>" CPUFREQ_SET_GOV
-                   "</command></action></item>\n",
-                   premark, govs->governor, govs->governor);
+            printf("  <item label='%s%s'><action name='Execute'><command>"
+                   CPUFREQ_SET " --cpu %u -g %s</command></action></item>\n",
+                   premark, govs->governor,
+                   cpu, govs->governor);
         }
         printf("</menu>\n");
         SEPARATOR
@@ -148,11 +142,13 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
             }
 
             printf("<menu label='%s%s%s' id='obcpufreq-freq%d'>\n"
-                   "  <item label='set as max'><action name='Execute'><command>" CPUFREQ_SET_MAX "</command></action></item>\n"
-                   "  <item label='set as min'><action name='Execute'><command>" CPUFREQ_SET_MIN "</command></action></item>\n"
-                   "</menu>\n",
+                   "  <item label='set as max'><action name='Execute'><command>"
+                       CPUFREQ_SET " --cpu %u --max %lu</command></action></item>\n"
+                   "  <item label='set as min'><action name='Execute'><command>"
+                       CPUFREQ_SET " --cpu %u --min %lu</command></action></item>\n</menu>\n",
                    premark, str, postmark, i,
-                   freqs->frequency, freqs->frequency);
+                   cpu, freqs->frequency,
+                   cpu, freqs->frequency);
         }
         cpufreq_put_available_frequencies(freqs);
     }
