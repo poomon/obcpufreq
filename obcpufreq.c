@@ -90,12 +90,11 @@ void print_cpu(unsigned int cpu, unsigned int n_cpu)
     struct cpufreq_policy* policy;
 
     if (cpu + 1 == n_cpu)
-        // last cpu
-        printf("<item label='cpu %u'/>\n", cpu, cpu);
-    else
-        printf("<menu label='cpu %u' id='obcpufreq-cpu%u'>\n", cpu, cpu);
-    if (cpu + 1 < n_cpu)
+        // last cpu column
+        printf("<item label='cpu %u'/>\n", cpu);
+    else if (cpu + 1 < n_cpu)
     {
+        printf("<menu label='cpu %u' id='obcpufreq-cpu%u'>\n", cpu, cpu + 1);
         print_cpu(cpu + 1, n_cpu);
         printf("</menu>\n");
     }
