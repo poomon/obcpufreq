@@ -38,7 +38,7 @@ It's quite same as other pipe menus.
 
 2. If you wish to change cpufreq policy by this menu it will be necessary to allow `sudo` command to
    invoke `cpufreq-set` command *without asking password*.
-   You can adjust `cpufreq-set` command line by `CPUFREQ_SET` macro in `obcpufreq.c` and recompile.
+   You can modify `cpufreq-set` command line in `Makefile`'s `CPUFREQ_SET` var.
 
 
 [GPLv2]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
