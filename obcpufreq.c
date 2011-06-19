@@ -3,7 +3,9 @@
 #include <string.h>
 #include <cpufreq.h>
 
+#ifndef CPUFREQ_SET
 #define CPUFREQ_SET "sudo -n cpufreq-set"
+#endif
 
 #define MAXLEN 20
 #define LINE_LEN 10

@@ -4,7 +4,7 @@ obcpufreq
 what
 ----
 obcpufreq is a tiny program to show/set cpu frequencies via a pipemenu
-for openbox3.
+of openbox3.
 
 license
 -------
@@ -13,13 +13,13 @@ license
 dependencies
 ------------
 * [libcpufreq][1] - It might be bundled with [cpufrequtils][1] package (or its successor cpupowerutils).
-* cpufreq-set command(optional) in [cpufrequtils] is required to modify current cpufreq settings.
+* (optional) `cpufreq-set` and `sudo` command are required to modify current cpufreq settings.
 
 compile
 -------
-Make sure you have a header file of libcpufreq, i.e. `/usr/include/cpufreq.h`
+Make sure you have a header file of libcpufreq, e.g. `/usr/include/cpufreq.h`
 
-    gcc -O2 -lcpufreq -o obcpufreq obcpufreq.c
+    make
 
 install
 -------
