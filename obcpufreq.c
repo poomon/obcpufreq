@@ -9,9 +9,9 @@
 
 #define MAXLEN 20
 #define LINE_LEN 10
-#define	PIPEMENU_BEGIN printf("<?xml version='1.0' encoding='UTF-8'?>\n<openbox_pipe_menu>\n");
-#define	PIPEMENU_END   printf("</openbox_pipe_menu>\n");
-#define SEPARATOR      printf(" <separator/>\n");
+#define	PIPEMENU_BEGIN "<?xml version='1.0' encoding='UTF-8'?>\n<openbox_pipe_menu>\n"
+#define	PIPEMENU_END   "</openbox_pipe_menu>\n"
+#define SEPARATOR      " <separator/>\n"
 
 
 static unsigned int count_cpus(void)
@@ -75,7 +75,7 @@ void get_human_speed(char* dest, unsigned long speed)
 
 void print_cpu(unsigned int cpu, unsigned int n_cpus)
 {
-    int i = 0;
+    int i;
     char str[MAXLEN];
     char premark[MAXLEN];
     char postmark[MAXLEN];
@@ -93,7 +93,7 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
         print_cpu(cpu + 1, n_cpus);
         printf("</menu>\n");
     }
-    SEPARATOR
+    printf(SEPARATOR);
 
     curfreq = cpufreq_get_freq_kernel(cpu);
     policy = cpufreq_get_policy(cpu);
@@ -119,13 +119,13 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
     }
     else
         printf("<item label='%s'/>\n", "no available governors");
-    SEPARATOR
+    printf(SEPARATOR);
 
     // print available freqs
     freqs = cpufreq_get_available_frequencies(cpu);
     if (freqs)
     {
-        for (; freqs; freqs = freqs->next, i++)
+        for (i = 0; freqs; freqs = freqs->next, i++)
         {
             freq = freqs->frequency;
             get_human_speed(str, freq);
@@ -165,9 +165,8 @@ void print_cpu(unsigned int cpu, unsigned int n_cpus)
 
 int main(int argc, char** argv)
 {
-    PIPEMENU_BEGIN
+    printf(PIPEMENU_BEGIN);
     print_cpu(0, count_cpus());
-    PIPEMENU_END
+    printf(PIPEMENU_END);
     return 0;
 }
-
